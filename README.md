@@ -26,9 +26,10 @@ To set up this project, follow these steps:
    git clone https://github.com/yourusername/text-similarity-model.git
    cd text-similarity-model
 2. Install the required packages:
+  ```bash
     pip install -r requirements.txt
-
 3. Run the Flask application locally:
+  ```bash
    python app.py
 
 

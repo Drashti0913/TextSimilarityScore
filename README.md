@@ -26,26 +26,20 @@ To set up this project, follow these steps:
    git clone https://github.com/yourusername/text-similarity-model.git
    cd text-similarity-model
 2. Install the required packages:
-  ```bash
-    pip install -r requirements.txt
+   ```bash
+   pip install -r requirements.txt
 3. Run the Flask application locally:
-  ```bash
+   ```bash
    python app.py
-
 
 ### Deployment on AWS EC2
 To deploy the application on an AWS EC2 instance, follow the AWS documentation to set up an EC2 instance, configure the security groups, and deploy the Flask application.
 
-Contributing
+### Contributing
 Contributions are welcome! Please feel free to submit a pull request or open an issue if you have suggestions or find a bug.
 
-License
+### License
 This project is licensed under the MIT License - see the LICENSE.md file for details.
 
-Contact
+### Contact
 If you have any questions, please open an issue or contact drashtibhavsar09@gmail.com.
-
-
----
-
-Feel free to adjust the content as per your project specifics and GitHub settings, such as repository links and deployment details. If there are specific sections or details you want to be added or modified, just let me know!

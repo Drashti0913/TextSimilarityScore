@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Text Similarity Checker</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#similarityForm').submit(function(event) {
+        event.preventDefault();
+        var text1 = $('#text1').val();
+        var text2 = $('#text2').val();
+        $.ajax({
+            url: '/similarity',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({text1: text1, text2: text2}),
+            dataType: 'json',
+            success: function(data) {
+                $('#result').text('Similarity Score: ' + data['similarity score']);
+            },
+            error: function(error) {
+                $('#result').text('Error: ' + error.responseText);
+            }
+        });
+    });
+});
+</script>
+</head>
+<body>
+<h1>Text Similarity Checker</h1>
+<form id="similarityForm">
+    <label for="text1">Text 1:</label><br>
+    <textarea id="text1" name="text1" required></textarea><br>
+    <label for="text2">Text 2:</label><br>
+    <textarea id="text2" name="text2" required></textarea><br>
+    <input type="submit" value="Check Similarity">
+</form>
+<div id="result"></div>
+</body>
+</html>

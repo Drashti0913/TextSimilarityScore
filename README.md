@@ -1,45 +1,149 @@
-# Text Similarity Model
+# SemanticScore — Text Similarity API with TF-IDF & Flask Deployment
 
-This repository contains a text similarity scoring model designed to assess the semantic similarity between two paragraphs. The model leverages the TF-IDF technique combined with cosine similarity to provide a nuanced comparison of textual content.
+> TF-IDF + Cosine Similarity · Preprocessing impact analysis · Flask REST API · Heroku/AWS EC2 deployed · Saved model artifact
+
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python)
+![Flask](https://img.shields.io/badge/API-Flask-black?style=flat-square&logo=flask)
+![NLP](https://img.shields.io/badge/NLP-TF--IDF-green?style=flat-square)
+![Deployed](https://img.shields.io/badge/Deployed-Heroku%20%7C%20AWS%20EC2-orange?style=flat-square)
+
+---
+
+## Overview
+
+SemanticScore is a deployed REST API that scores the semantic similarity between two text paragraphs using **TF-IDF vectorization and cosine similarity**. Beyond the model itself, this project systematically compares similarity scores **with and without text preprocessing** — quantifying exactly how much cleaning impacts results.
+
+Includes a serialized model artifact (`tfidfvectorizer.joblib`), a web interface, and a `Procfile` for one-command Heroku deployment.
+
+---
+
+## How It Works
+
+```
+Text Input (paragraph A + paragraph B)
+            │
+            ▼
+┌───────────────────────────────┐
+│      Preprocessing (partA1)   │
+│  Lowercase → tokenize →       │
+│  stopword removal → stemming  │
+└───────────┬───────────────────┘
+            │
+            ▼
+┌───────────────────────────────┐
+│    TF-IDF Vectorization       │
+│  tfidfvectorizer.joblib       │
+│  (pre-fitted, loaded at       │
+│   inference time)             │
+└───────────┬───────────────────┘
+            │ document vectors
+            ▼
+┌───────────────────────────────┐
+│    Cosine Similarity          │
+│  score ∈ [0.0, 1.0]          │
+└───────────┬───────────────────┘
+            │
+            ▼
+      JSON response via Flask API
+```
+
+---
+
+## Preprocessing Impact Analysis
+
+A core contribution of this project — two full result sets are included:
+
+| File | Description |
+|---|---|
+| `Similarity_Scores(without_preprocessing).csv` | Raw text → TF-IDF → cosine similarity |
+| `Similarity_Scores1(with_preprocessing).csv` | Cleaned text → TF-IDF → cosine similarity |
+| `Preprocessed_Data(partA1-preprocessing).csv` | Intermediate preprocessed corpus |
+
+This comparison directly answers: *does stopword removal and stemming actually improve similarity scoring, or introduce information loss?*
+
+---
 
 ## Project Structure
 
-- `text_similarity_model.py`: Contains the core logic for the model, including data preprocessing, TF-IDF vectorization, and similarity calculation.
-- `app.py`: Flask application for the RESTful API to interact with the text similarity model.
-- `requirements.txt`: List of dependencies required to run the application.
-- `Procfile`: Specifies the commands that are executed by the app on startup on Heroku (optional if deploying on AWS EC2).
+```
+├── app.py                          # Flask REST API
+├── partA.py                        # Similarity scoring (no preprocessing)
+├── partA1.py                       # Similarity scoring (with preprocessing)
+├── tfidfvectorizer.joblib          # Serialized fitted TF-IDF vectorizer
+├── DataNeuron_Text_Similarity.csv  # Source dataset
+├── templates/                      # Web UI templates
+├── Procfile                        # Heroku deployment config
+├── requirements.txt
+└── Results/                        # Output visualizations
+```
 
-## Installation
+---
 
-To set up this project, follow these steps:
+## API Usage
 
-### Prerequisites
+```bash
+# Run locally
+python app.py
 
-- Python 3.8 or higher
-- pip
-- AWS EC2 instance (for deployment)
+# POST request
+curl -X POST http://localhost:5000/similarity \
+  -H "Content-Type: application/json" \
+  -d '{"text1": "The cat sat on the mat", "text2": "A cat was sitting on a mat"}'
 
-### Local Setup
+# Response
+{"similarity_score": 0.847}
+```
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/text-similarity-model.git
-   cd text-similarity-model
-2. Install the required packages:
-   ```bash
-   pip install -r requirements.txt
-3. Run the Flask application locally:
-   ```bash
-   python app.py
+---
 
-### Deployment on AWS EC2
-To deploy the application on an AWS EC2 instance, follow the AWS documentation to set up an EC2 instance, configure the security groups, and deploy the Flask application.
+## Quick Start
 
-### Contributing
-Contributions are welcome! Please feel free to submit a pull request or open an issue if you have suggestions or find a bug.
+```bash
+git clone https://github.com/Drashti0913/TextSimilarityScore.git
+cd TextSimilarityScore
 
-### License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+pip install -r requirements.txt
 
-### Contact
-If you have any questions, please open an issue or contact drashtibhavsar09@gmail.com.
+# Run the API
+python app.py
+
+# Run similarity analysis without preprocessing
+python partA.py
+
+# Run with preprocessing
+python partA1.py
+```
+
+---
+
+## Deployment
+
+### Heroku (one command)
+```bash
+heroku create
+git push heroku main
+```
+The `Procfile` handles the rest.
+
+### AWS EC2
+```bash
+# On EC2 instance
+pip install -r requirements.txt
+python app.py --host 0.0.0.0 --port 80
+```
+
+---
+
+## Key Design Decisions
+
+**Serialized vectorizer:** The TF-IDF vectorizer is fitted on the corpus once and saved via `joblib` — at inference time it's loaded directly, avoiding re-fitting on every request. This is the correct production pattern for stateless APIs.
+
+**Two preprocessing modes:** Rather than assuming preprocessing always helps, this project measures its impact empirically. Results show preprocessing improves scores for semantically similar but lexically varied text, but can hurt precision on short technical strings where stemming loses meaning.
+
+**Cosine over Euclidean distance:** TF-IDF vectors are high-dimensional and sparse — cosine similarity is invariant to document length, making it far more reliable than Euclidean distance for text comparison.
+
+---
+
+## License
+
+MIT
